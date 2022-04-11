@@ -30,4 +30,4 @@ jobs:
           skipClusterCreation: "true"
       - name: e2e tests
         run: |
-         CREATE_ONLY=true make e2e-tests kind-e2e-tests
+         make kind-create-cluster kind-e2e-tests

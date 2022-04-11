@@ -35,6 +35,9 @@ unit-tests: test_deps
 e2e-tests:
 	KUBE_VERSION=${KUBE_VERSION} $(ROOT_DIR)/scripts/e2e-tests.sh
 
+kind-create-cluster:
+	KUBE_VERSION=${KUBE_VERSION} $(ROOT_DIR)/scripts/create-cluster.sh
+
 kind-e2e-tests: build-docker
 	kind load docker-image --name $(CLUSTER_NAME) ${REPO}:${TAG}
 	$(MAKE) e2e-tests
