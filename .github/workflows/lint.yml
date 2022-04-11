@@ -2,10 +2,7 @@ name: Lint
 on:
   pull_request:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+
 jobs:
   lint:
     runs-on: ubuntu-latest
