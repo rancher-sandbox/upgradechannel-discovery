@@ -16,11 +16,6 @@ jobs:
       BRIDGE_IP: "172.17.0.1"
     steps:
       - uses: actions/checkout@v2
-      - name: Download chart
-        uses: actions/download-artifact@v2
-        with:
-          name: chart
-          path: build
       - name: Install Go
         uses: actions/setup-go@v2
         with:
