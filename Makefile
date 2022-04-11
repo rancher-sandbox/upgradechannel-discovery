@@ -29,7 +29,7 @@ test_deps:
 
 .PHONY: unit-tests
 unit-tests: test_deps
-	ginkgo -r -v  --covermode=atomic --coverprofile=coverage.out -p -r ./...
+	ginkgo -r -v  --covermode=atomic --coverprofile=coverage.out -p -r ./pkg/...
 
 
 e2e-tests:

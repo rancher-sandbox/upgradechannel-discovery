@@ -14,29 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package discovery
+package github_test
 
 import (
-	"encoding/json"
+	"testing"
 
-	"github.com/hashicorp/go-multierror"
-	provv1 "github.com/rancher-sandbox/rancheros-operator/pkg/apis/rancheros.cattle.io/v1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-type Discoverer interface {
-	Discovery() (res []*provv1.ManagedOSVersion, err error)
-}
-
-func Versions(d ...Discoverer) ([]byte, error) {
-	var err error
-	var versions []*provv1.ManagedOSVersion
-	for _, dd := range d {
-		res, e := dd.Discovery()
-		if e != nil {
-			err = multierror.Append(err, e)
-		}
-		versions = append(versions, res...)
-	}
-
-	return json.Marshal(versions)
+func TestGithub(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "github discovery test Suite")
 }
