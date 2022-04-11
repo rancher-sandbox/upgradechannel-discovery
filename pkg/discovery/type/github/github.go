@@ -43,37 +43,48 @@ type githubOptions struct {
 
 type githubSetting func(g *githubOptions) error
 
-func WithRepository(s string) githubSetting {
+// WithRepository sets a Github repository to scan releases against
+func WithRepository(s string) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.repository = s
 		return nil
 	}
 }
-func WithContext(ctx context.Context) githubSetting {
+
+// WithContext sets a context for the discovery action
+func WithContext(ctx context.Context) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.ctx = ctx
 		return nil
 	}
 }
-func WithToken(s string) githubSetting {
+
+// WithToken sets a github token to use for auth requests.
+func WithToken(s string) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.githubToken = s
 		return nil
 	}
 }
-func WithBaseImage(s string) githubSetting {
+
+// WithBaseImage Sets a base image to prefix the upgradeImage version with.
+func WithBaseImage(s string) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.baseImage = s
 		return nil
 	}
 }
-func WithVersionNamePrefix(s string) githubSetting {
+
+// WithVersionNamePrefix adds a prefix to the created ManagedOSVersion resource
+func WithVersionNamePrefix(s string) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.versionNamePrefix = s
 		return nil
 	}
 }
-func WithVersionNameSuffix(s string) githubSetting {
+
+// WithVersionNameSuffix appends a suffix to the created ManagedOSVersion resource
+func WithVersionNameSuffix(s string) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.versionNameSuffix = s
 		return nil
@@ -104,7 +115,8 @@ func newHTTPClient(ctx context.Context, token string) *http.Client {
 	return oauth2.NewClient(ctx, src)
 }
 
-func NewReleaseFinder(opts ...githubSetting) (*releaseFinder, error) {
+// NewReleaseFinder returns a new Github release finder discovery with the required settings
+func NewReleaseFinder(opts ...githubSetting) (*releaseFinder, error) { //nolint:golint,revive
 	o := &githubOptions{
 		ctx: context.Background(),
 	}
@@ -143,6 +155,7 @@ func (f *releaseFinder) findAll(slug string) ([]*github.RepositoryRelease, error
 	return rels, nil
 }
 
+// Discovery retrieves ManagedOSVersion from github releases
 func (f *releaseFinder) Discovery() (res []*provv1.ManagedOSVersion, err error) {
 	rels, err := f.findAll(f.opts.repository)
 	for _, r := range rels {

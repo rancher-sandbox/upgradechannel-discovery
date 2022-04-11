@@ -98,12 +98,12 @@ func main() {
 						return err
 					}
 
-					if outFile != "" {
-						return ioutil.WriteFile(outFile, b, os.ModePerm)
-					} else {
+					if outFile == "" {
 						fmt.Print(string(b))
+						return nil
 					}
-					return nil
+
+					return ioutil.WriteFile(outFile, b, os.ModePerm)
 				},
 			},
 		},
