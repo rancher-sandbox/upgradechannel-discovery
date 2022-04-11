@@ -27,7 +27,6 @@ var _ = Describe("Discovery e2e tests", func() {
 	k := kubectl.New()
 	Context("discovery", func() {
 		It("Populates new ManagedOSVersion", func() {
-
 			mr := catalog.NewManagedOSVersionChannel(
 				"testchannel",
 				"custom",
@@ -53,6 +52,7 @@ var _ = Describe("Discovery e2e tests", func() {
 					"args":       []string{"github"},
 				},
 			)
+			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel")
 
 			Eventually(func() error {
 				return k.ApplyYAML("fleet-default", "testchannel", mr)
@@ -66,6 +66,43 @@ var _ = Describe("Discovery e2e tests", func() {
 				return string(r)
 			}, 6*time.Minute, 2*time.Second).Should(
 				Equal("test/test:v0.1.0-alpha22"),
+			)
+		})
+
+		It("Populates new ManagedOSVersion with defaults", func() {
+			mr := catalog.NewManagedOSVersionChannel(
+				"testchannel",
+				"custom",
+				map[string]interface{}{
+					"image": testImage,
+					"envs": []map[string]string{
+						{
+							"name":  "REPOSITORY",
+							"value": "rancher-sandbox/os2",
+						},
+						{
+							"name":  "IMAGE_PREFIX",
+							"value": "test/test2",
+						},
+					},
+					"command": []string{"/usr/bin/upgradechannel-discovery"},
+					"args":    []string{"github"},
+				},
+			)
+			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel")
+
+			Eventually(func() error {
+				return k.ApplyYAML("fleet-default", "testchannel", mr)
+			}, 2*time.Minute, 2*time.Second).ShouldNot(HaveOccurred())
+
+			Eventually(func() string {
+				r, err := kubectl.GetData("fleet-default", "ManagedOSVersion", "v0.1.0-alpha22", `jsonpath={.spec.metadata.upgradeImage}`)
+				if err != nil {
+					fmt.Println(err)
+				}
+				return string(r)
+			}, 6*time.Minute, 2*time.Second).Should(
+				Equal("test/test2:v0.1.0-alpha22"),
 			)
 		})
 	})

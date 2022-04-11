@@ -55,7 +55,7 @@ func main() {
 					&cli.StringFlag{
 						Name:   "output-file",
 						EnvVar: "OUTPUT_FILE",
-						Value:  "",
+						Value:  "/data/output",
 						Usage:  "File to output the resulting json from",
 					},
 					&cli.StringFlag{
