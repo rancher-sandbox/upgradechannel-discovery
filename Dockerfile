@@ -8,5 +8,7 @@ COPY pkg /src/pkg
 RUN go build -ldflags "-extldflags -static -s" -o /usr/bin/upgradechannel-discovery
 
 FROM scratch
+# So https works
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /usr/bin/upgradechannel-discovery /usr/bin/upgradechannel-discovery
 ENTRYPOINT "/usr/bin/upgradechannel-discovery"
