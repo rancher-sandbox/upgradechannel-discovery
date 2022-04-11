@@ -3,11 +3,11 @@ GIT_COMMIT_SHORT?=$(shell git rev-parse --short HEAD)
 GIT_TAG?=$(shell git describe --abbrev=0 --tags 2>/dev/null || echo "v0.0.0" )
 TAG?=${GIT_TAG}-${GIT_COMMIT_SHORT}
 REPO?=quay.io/costoolkit/upgradechannel-discovery
+export TEST_IMAGE?=$(REPO):$(TAG)
 export ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-ROS_CHART?=$(shell find $(ROOT_DIR) -type f  -name "rancheros-operator*.tgz" -print)
+export ROS_CHART?=$(shell find $(ROOT_DIR) -type f  -name "rancheros-operator*.tgz" -print)
 KUBE_VERSION?="v1.22.7"
-CLUSTER_NAME?="upgradechannel-discovery-e2e"
+export CLUSTER_NAME?=upgradechannel-discovery-e2e
 
 .PHONY: build
 build:

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 KUBE_VERSION=${KUBE_VERSION:-v1.22.7}
-CLUSTER_NAME="${CLUSTER_NAME:-ros-e2e}"
+CLUSTER_NAME="${CLUSTER_NAME:-upgradechannel-discovery}"
 
 if ! kind get clusters | grep "$CLUSTER_NAME"; then
 cat << EOF > kind.config
@@ -21,11 +21,15 @@ EOF
     rm -rf kind.config
 fi
 
+if [ -n "$CREATE_ONLY" ]; then
+  exit 0
+fi
+
 set -e
 
 kubectl cluster-info --context kind-$CLUSTER_NAME
 echo "Sleep to give times to node to populate with all info"
-kubectl wait --for=condition=Ready node/ros-e2e-control-plane
+kubectl wait --for=condition=Ready node/$CLUSTER_NAME-control-plane
 export EXTERNAL_IP=$(kubectl get nodes -o jsonpath='{.items[].status.addresses[?(@.type == "InternalIP")].address}')
 export BRIDGE_IP="172.18.0.1"
 kubectl get nodes -o wide
