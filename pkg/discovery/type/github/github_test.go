@@ -32,6 +32,7 @@ var _ = Describe("github discovery", func() {
 			_, err = rf.Discovery()
 			Expect(err).To(HaveOccurred())
 		})
+
 		It("detect releases", func() {
 			rf, err := NewReleaseFinder(WithRepository("rancher-sandbox/os2"))
 			Expect(err).ToNot(HaveOccurred())

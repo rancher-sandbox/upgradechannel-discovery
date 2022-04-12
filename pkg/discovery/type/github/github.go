@@ -204,6 +204,7 @@ func (f *releaseFinder) Discovery() (res []*provv1.ManagedOSVersion, err error) 
 				Metadata: &v1alpha1.GenericMap{
 					Data: map[string]interface{}{
 						"upgradeImage": fmt.Sprintf("%s:%s", f.opts.baseImage, v),
+						"github_data":  r,
 					},
 				},
 			},
