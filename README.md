@@ -27,6 +27,6 @@ spec:
     - github
     command:
     - /usr/bin/upgradechannel-discovery
-    image: ...
+    image: "quay.io/costoolkit/upgradechannel-discovery:v0.1-18bb1aa"
   type: custom
 ```
