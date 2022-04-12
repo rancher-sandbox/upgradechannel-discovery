@@ -9,6 +9,9 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # undocumented OIDC support.
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -18,6 +21,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
+      - name: Set up cosign
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v1.7.1' # optional
       - uses: actions/cache@v2
         with:
           path: |
