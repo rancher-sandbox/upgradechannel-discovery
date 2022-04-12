@@ -44,6 +44,38 @@ var _ = Describe("github discovery", func() {
 			Expect(res[0].Spec.Metadata.Data).To(HaveKey("upgradeImage"))
 		})
 
+		It("includes no pre-releases by default", func() {
+			rf, err := NewReleaseFinder(WithRepository("rancher-sandbox/upgradechannel-discovery-test-repo"))
+			Expect(err).ToNot(HaveOccurred())
+
+			res, err := rf.Discovery()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(len(res) > 0).To(BeTrue())
+
+			Expect(res[0].ObjectMeta.Name).ToNot(BeEmpty())
+			Expect(res[0].Spec.Metadata.Data).To(HaveKey("upgradeImage"))
+			for _, release := range res {
+				Expect(release.Name).ToNot(ContainSubstring("rc1"))
+			}
+		})
+
+		It("includes pre-releases if set", func() {
+			rf, err := NewReleaseFinder(WithRepository("rancher-sandbox/upgradechannel-discovery-test-repo"), WithPreReleases(true))
+			Expect(err).ToNot(HaveOccurred())
+
+			res, err := rf.Discovery()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(len(res) > 0).To(BeTrue())
+
+			Expect(res[0].ObjectMeta.Name).ToNot(BeEmpty())
+			Expect(res[0].Spec.Metadata.Data).To(HaveKey("upgradeImage"))
+			var versions []string
+			for _, release := range res {
+				versions = append(versions, release.Name)
+			}
+			Expect(versions).Should(ContainElement(ContainSubstring("rc1")))
+		})
+
 		It("manipulates releases results", func() {
 			rf, err := NewReleaseFinder(
 				WithRepository("rancher-sandbox/os2"),
