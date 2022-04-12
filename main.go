@@ -88,6 +88,11 @@ func main() {
 						Value:  "rancher-sandbox/os2",
 						Usage:  "Github repository to scan releases against",
 					},
+					&cli.BoolFlag{
+						Name:   "pre-releases",
+						Usage:  "Enable pre-releases in the releases scan",
+						EnvVar: "PRE_RELEASES",
+					},
 				},
 				Action: func(c *cli.Context) error {
 					outFile := c.String("output-file")
@@ -101,6 +106,7 @@ func main() {
 						github.WithVersionNamePrefix(c.String("version-name-prefix")),
 						github.WithVersionNameSuffix(c.String("version-name-suffix")),
 						github.WithBaseImage(c.String("image-prefix")),
+						github.WithPreReleases(c.Bool("pre-releases")),
 					)
 
 					if err != nil {
