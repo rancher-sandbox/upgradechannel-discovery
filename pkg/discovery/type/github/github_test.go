@@ -43,5 +43,35 @@ var _ = Describe("github discovery", func() {
 			Expect(res[0].ObjectMeta.Name).ToNot(BeEmpty())
 			Expect(res[0].Spec.Metadata.Data).To(HaveKey("upgradeImage"))
 		})
+
+		It("manipulates releases results", func() {
+			rf, err := NewReleaseFinder(
+				WithRepository("rancher-sandbox/os2"),
+				WithVersionPrefix("foo"),
+				WithVersionSuffix("bar"),
+				WithVersionNamePrefix("zap"),
+				WithVersionNameSuffix("zof"),
+			)
+			Expect(err).ToNot(HaveOccurred())
+
+			res, err := rf.Discovery()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(len(res) > 0).To(BeTrue())
+
+			Expect(res[0].ObjectMeta.Name).ToNot(BeEmpty())
+			Expect(res[0].Spec.Metadata.Data).To(HaveKey("upgradeImage"))
+
+			Expect(res[0].ObjectMeta.Name).To(And(
+				MatchRegexp("^zap.*"),
+				MatchRegexp(".*zof$"),
+			))
+			Expect(res[0].Spec.Version).To(And(
+				MatchRegexp("^foo.*"),
+				MatchRegexp(".*bar$"),
+			))
+			Expect(res[0].Spec.Metadata.Data["upgradeImage"]).To(And(
+				MatchRegexp(".*:foo.*bar$"),
+			))
+		})
 	})
 })
