@@ -33,15 +33,15 @@ import (
 )
 
 type githubOptions struct {
-	versionNamePrefix string
-	versionNameSuffix string
-	versionSuffix     string
-	versionPrefix     string
-	baseImage         string
-	githubToken       string
-	repository        string
+	versionNamePrefix  string
+	versionNameSuffix  string
+	versionSuffix      string
+	versionPrefix      string
+	baseImage          string
+	githubToken        string
+	repository         string
 	includePreReleases bool
-	ctx               context.Context
+	ctx                context.Context
 }
 
 type githubSetting func(g *githubOptions) error
@@ -187,7 +187,7 @@ func (f *releaseFinder) Discovery() (res []*provv1.ManagedOSVersion, err error) 
 	rels, err := f.findAll(f.opts.repository)
 	for _, r := range rels {
 
-    // skip pre-releases unless we explicitly include them
+		// skip pre-releases unless we explicitly include them
 		if *r.Prerelease && !f.opts.includePreReleases {
 			continue
 		}
