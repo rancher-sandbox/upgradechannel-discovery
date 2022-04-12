@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ steps.export_tag.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
