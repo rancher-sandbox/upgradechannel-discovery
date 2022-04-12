@@ -33,13 +33,15 @@ import (
 )
 
 type githubOptions struct {
-	versionNamePrefix  string
-	versionNameSuffix  string
-	baseImage          string
-	githubToken        string
-	repository         string
+	versionNamePrefix string
+	versionNameSuffix string
+	versionSuffix     string
+	versionPrefix     string
+	baseImage         string
+	githubToken       string
+	repository        string
 	includePreReleases bool
-	ctx                context.Context
+	ctx               context.Context
 }
 
 type githubSetting func(g *githubOptions) error
@@ -96,6 +98,22 @@ func WithVersionNameSuffix(s string) githubSetting { //nolint:golint,revive
 func WithPreReleases(value bool) githubSetting { //nolint:golint,revive
 	return func(g *githubOptions) error {
 		g.includePreReleases = value
+		return nil
+	}
+}
+
+// WithVersionSuffix appends a suffix to the retrieved version
+func WithVersionSuffix(s string) githubSetting { //nolint:golint,revive
+	return func(g *githubOptions) error {
+		g.versionSuffix = s
+		return nil
+	}
+}
+
+// WithVersionPrefix adds a prefix to the retrieved version
+func WithVersionPrefix(s string) githubSetting { //nolint:golint,revive
+	return func(g *githubOptions) error {
+		g.versionPrefix = s
 		return nil
 	}
 }
@@ -168,20 +186,24 @@ func (f *releaseFinder) findAll(slug string) ([]*github.RepositoryRelease, error
 func (f *releaseFinder) Discovery() (res []*provv1.ManagedOSVersion, err error) {
 	rels, err := f.findAll(f.opts.repository)
 	for _, r := range rels {
-		// skip pre-releases unless we explicitly include them
+
+    // skip pre-releases unless we explicitly include them
 		if *r.Prerelease && !f.opts.includePreReleases {
 			continue
 		}
+
+		v := strings.Join([]string{f.opts.versionPrefix, *r.TagName, f.opts.versionSuffix}, "")
+
 		res = append(res, &provv1.ManagedOSVersion{
 			ObjectMeta: v1.ObjectMeta{
-				Name: fmt.Sprintf("%s%s%s", f.opts.versionNamePrefix, *r.TagName, f.opts.versionNameSuffix),
+				Name: strings.Join([]string{f.opts.versionNamePrefix, v, f.opts.versionNameSuffix}, ""),
 			},
 			Spec: provv1.ManagedOSVersionSpec{
 				Type:    "container",
-				Version: *r.TagName,
+				Version: v,
 				Metadata: &v1alpha1.GenericMap{
 					Data: map[string]interface{}{
-						"upgradeImage": fmt.Sprintf("%s:%s", f.opts.baseImage, *r.TagName),
+						"upgradeImage": fmt.Sprintf("%s:%s", f.opts.baseImage, v),
 					},
 				},
 			},

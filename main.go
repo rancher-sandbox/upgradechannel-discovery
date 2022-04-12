@@ -71,6 +71,18 @@ func main() {
 						Usage:  "Version name suffix",
 					},
 					&cli.StringFlag{
+						Name:   "version-prefix",
+						EnvVar: "VERSION_PREFIX",
+						Value:  "",
+						Usage:  "Version prefix",
+					},
+					&cli.StringFlag{
+						Name:   "version-suffix",
+						EnvVar: "VERSION_SUFFIX",
+						Value:  "",
+						Usage:  "Version suffix",
+					},
+					&cli.StringFlag{
 						Name:   "repository",
 						EnvVar: "REPOSITORY",
 						Value:  "rancher-sandbox/os2",
@@ -89,6 +101,8 @@ func main() {
 						github.WithContext(context.Background()),
 						github.WithRepository(c.String("repository")),
 						github.WithToken(c.String("github-token")),
+						github.WithVersionPrefix(c.String("version-prefix")),
+						github.WithVersionSuffix(c.String("version-suffix")),
 						github.WithVersionNamePrefix(c.String("version-name-prefix")),
 						github.WithVersionNameSuffix(c.String("version-name-suffix")),
 						github.WithBaseImage(c.String("image-prefix")),
