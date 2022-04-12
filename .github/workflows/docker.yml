@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+    - main
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -11,14 +13,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: |
-            quay.io/costoolkit/upgradechannel-discovery
-          tags: |
-            type=semver,pattern={{raw}}
+      - name: Export tag
+        id: export_tag
+        run: |
+          git describe --tags --exact-match --dirty
+          TAG=`git describe --tags --exact-match --dirty 2>/dev/null || echo "latest"`
+          echo "::set-output name=tag::$TAG"
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.export_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
