@@ -14,9 +14,11 @@ limitations under the License.
 package e2e_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/google/go-github/github"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	kubectl "github.com/rancher-sandbox/ele-testhelpers/kubectl"
@@ -104,6 +106,18 @@ var _ = Describe("Discovery e2e tests", func() {
 			}, 6*time.Minute, 2*time.Second).Should(
 				Equal("test/test2:v0.1.0-alpha22"),
 			)
+
+			githubData, err := kubectl.GetData("fleet-default", "ManagedOSVersion", "v0.1.0-alpha22", `jsonpath={.spec.metadata.github_data}`)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			releases := &github.RepositoryRelease{}
+
+			err = json.Unmarshal([]byte(githubData), &releases)
+			Expect(err).ToNot(HaveOccurred(), string(githubData))
+
+			Expect(*releases.URL).To(ContainSubstring("https"))
 		})
 	})
 })
