@@ -38,5 +38,10 @@ func Versions(d ...Discoverer) ([]byte, error) {
 		versions = append(versions, res...)
 	}
 
-	return json.Marshal(versions)
+	b, e := json.Marshal(versions)
+	if e != nil {
+		err = multierror.Append(err, e)
+	}
+
+	return b, err
 }

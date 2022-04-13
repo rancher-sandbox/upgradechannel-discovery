@@ -71,7 +71,7 @@ var _ = Describe("Discovery e2e tests", func() {
 			)
 		})
 
-		It("Populates new ManagedOSVersion with defaults", func() {
+		It("Populates new ManagedOSVersion with defaults from github releases", func() {
 			mr := catalog.NewManagedOSVersionChannel(
 				"testchannel",
 				"custom",
@@ -118,6 +118,39 @@ var _ = Describe("Discovery e2e tests", func() {
 			Expect(err).ToNot(HaveOccurred(), string(githubData))
 
 			Expect(*releases.URL).To(ContainSubstring("https"))
+		})
+
+		It("Populates new ManagedOSVersion from a git repository", func() {
+			mr := catalog.NewManagedOSVersionChannel(
+				"testchannel3",
+				"custom",
+				map[string]interface{}{
+					"image": testImage,
+					"envs": []map[string]string{
+						{
+							"name":  "REPOSITORY",
+							"value": "https://github.com/rancher-sandbox/upgradechannel-discovery-test-repo",
+						},
+					},
+					"command": []string{"/usr/bin/upgradechannel-discovery"},
+					"args":    []string{"git"},
+				},
+			)
+			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel3")
+
+			Eventually(func() error {
+				return k.ApplyYAML("fleet-default", "testchannel3", mr)
+			}, 2*time.Minute, 2*time.Second).ShouldNot(HaveOccurred())
+
+			Eventually(func() string {
+				r, err := kubectl.GetData("fleet-default", "ManagedOSVersion", "v0.1.0-beta1", `jsonpath={.spec.metadata.upgradeImage}`)
+				if err != nil {
+					fmt.Println(err)
+				}
+				return string(r)
+			}, 6*time.Minute, 2*time.Second).Should(
+				Equal("foo/bar:v0.1.0-beta1"),
+			)
 		})
 	})
 })
