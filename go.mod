@@ -32,6 +32,7 @@ replace (
 )
 
 require (
+	github.com/go-git/go-git/v5 v5.4.2 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0

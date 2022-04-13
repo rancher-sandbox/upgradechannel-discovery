@@ -23,6 +23,8 @@ import (
 	"os"
 
 	discovery "github.com/rancher-sandbox/upgradechannel-discovery/pkg/discovery"
+	git "github.com/rancher-sandbox/upgradechannel-discovery/pkg/discovery/type/git"
+
 	github "github.com/rancher-sandbox/upgradechannel-discovery/pkg/discovery/type/github"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -37,6 +39,59 @@ func main() {
 		Description: "",
 		Copyright:   "",
 		Commands: []cli.Command{
+			{
+				Name: "git",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:   "output-file",
+						EnvVar: "OUTPUT_FILE",
+						Value:  "/data/output",
+						Usage:  "File to output the resulting json from",
+					},
+					&cli.StringFlag{
+						Name:   "branch",
+						EnvVar: "BRANCH",
+						Value:  "",
+						Usage:  "Repository branch",
+					},
+					&cli.StringFlag{
+						Name:   "repository",
+						EnvVar: "REPOSITORY",
+						Value:  "https://github.com/rancher-sandbox/os2",
+						Usage:  "git repository to scan releases against",
+					},
+					&cli.StringFlag{
+						Name:   "subpath",
+						Usage:  "Repository subpath",
+						EnvVar: "SUBPATH",
+					},
+				},
+				Action: func(c *cli.Context) error {
+					outFile := c.String("output-file")
+
+					rf, err := git.NewReleaseFinder(
+						git.WithRepository(c.String("repository")),
+						git.WithSubpath(c.String("subpath")),
+						git.WithBranch(c.String("branch")),
+					)
+
+					if err != nil {
+						return err
+					}
+
+					b, err := discovery.Versions(rf)
+					if err != nil {
+						return err
+					}
+
+					if outFile == "" {
+						fmt.Print(string(b))
+						return nil
+					}
+
+					return ioutil.WriteFile(outFile, b, os.ModePerm)
+				},
+			},
 			{
 				Name: "github",
 				Flags: []cli.Flag{
