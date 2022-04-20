@@ -32,17 +32,19 @@ replace (
 )
 
 require (
-	github.com/go-git/go-git/v5 v5.4.2 // indirect
+	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.19.0
-	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20220407145032-98e4e6e3302b
-	github.com/rancher-sandbox/rancheros-operator v0.1.0-alpha24
+	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20220420071633-4d090487a09f
+	github.com/rancher-sandbox/rancheros-operator v0.1.0
 	github.com/rancher/fleet/pkg/apis v0.0.0-20210927195558-4aaa778d23dd
+	github.com/rancher/system-upgrade-controller/pkg/apis v0.0.0-20210929162341-5e6e996d9486
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.5
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
+	k8s.io/api v0.22.2
 	k8s.io/apimachinery v0.22.2
 )
