@@ -53,6 +53,7 @@ var _ = Describe("Discovery e2e tests", func() {
 					"outputFile": "/output/data", // This defaults to /data/output
 					"args":       []string{"github"},
 				},
+				nil,
 			)
 			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel")
 
@@ -90,6 +91,7 @@ var _ = Describe("Discovery e2e tests", func() {
 					"command": []string{"/usr/bin/upgradechannel-discovery"},
 					"args":    []string{"github"},
 				},
+				nil,
 			)
 			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel")
 
@@ -135,6 +137,7 @@ var _ = Describe("Discovery e2e tests", func() {
 					"command": []string{"/usr/bin/upgradechannel-discovery"},
 					"args":    []string{"git"},
 				},
+				nil,
 			)
 			defer k.Delete("managedosversionchannel", "-n", "fleet-default", "testchannel3")
 

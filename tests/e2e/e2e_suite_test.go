@@ -17,9 +17,15 @@ limitations under the License.
 package e2e_test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -72,6 +78,19 @@ func deployOperator(k *kubectl.Kubectl) {
 		err = k.WaitForNamespaceWithPod("cattle-rancheros-operator-system", "app=rancheros-operator")
 		Expect(err).ToNot(HaveOccurred())
 
+		pods, err := k.GetPodNames("cattle-rancheros-operator-system", "app=rancheros-operator")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(len(pods)).To(Equal(1))
+
+		Eventually(func() string {
+			str, _ := kubectl.Run("logs", "-n", "cattle-rancheros-operator-system", pods[0])
+			fmt.Println(str)
+			return str
+		}, 5*time.Minute, 2*time.Second).Should(
+			And(
+				ContainSubstring("Starting management.cattle.io/v3, Kind=Setting controller"),
+			))
+
 		err = k.ApplyYAML("", "server-url", catalog.NewSetting("server-url", "env", fmt.Sprintf("%s.%s", externalIP, magicDNS)))
 		Expect(err).ToNot(HaveOccurred())
 
@@ -119,8 +138,20 @@ var _ = BeforeSuite(func() {
 		return
 	}
 
+	installed := func(n string) bool {
+		pods, err := k.GetPodNames(n, "")
+		if err == nil && len(pods) > 0 {
+			return true
+		}
+		return false
+	}
+
 	By("Deploying ros-operator chart dependencies", func() {
 		By("installing nginx", func() {
+			if installed("ingress-nginx") {
+				By("already installed")
+				return
+			}
 			kubectl.CreateNamespace("ingress-nginx")
 			err := kubectl.Apply("ingress-nginx", "https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml")
 			Expect(err).ToNot(HaveOccurred())
@@ -130,6 +161,11 @@ var _ = BeforeSuite(func() {
 		})
 
 		By("installing cert-manager", func() {
+			if installed("cert-manager") {
+				By("already installed")
+				return
+			}
+
 			err := kubectl.RunHelmBinaryWithCustomErr("-n", "cert-manager", "install", "--set", "installCRDs=true", "--create-namespace", "cert-manager", "https://charts.jetstack.io/charts/cert-manager-v1.5.3.tgz")
 			Expect(err).ToNot(HaveOccurred())
 
@@ -141,6 +177,11 @@ var _ = BeforeSuite(func() {
 		})
 
 		By("installing rancher", func() {
+			if installed("cattle-system") {
+				By("already installed")
+				return
+			}
+
 			err := kubectl.RunHelmBinaryWithCustomErr(
 				"-n",
 				"cattle-system",
@@ -163,6 +204,30 @@ var _ = BeforeSuite(func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			err = k.WaitForNamespaceWithPod("cattle-fleet-local-system", "app=fleet-agent")
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		By("installing system-upgrade-controller", func() {
+
+			resp, err := http.Get("https://github.com/rancher/system-upgrade-controller/releases/download/v0.9.1/system-upgrade-controller.yaml")
+			Expect(err).ToNot(HaveOccurred())
+			defer resp.Body.Close()
+			data := bytes.NewBuffer([]byte{})
+
+			_, err = io.Copy(data, resp.Body)
+			Expect(err).ToNot(HaveOccurred())
+
+			// It needs to look over cattle-system ns to be functional
+			toApply := strings.ReplaceAll(data.String(), "namespace: system-upgrade", "namespace: cattle-system")
+
+			temp, err := ioutil.TempFile("", "temp")
+			Expect(err).ToNot(HaveOccurred())
+
+			defer os.RemoveAll(temp.Name())
+			err = ioutil.WriteFile(temp.Name(), []byte(toApply), os.ModePerm)
+			Expect(err).ToNot(HaveOccurred())
+
+			err = kubectl.Apply("cattle-system", temp.Name())
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
