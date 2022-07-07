@@ -14,4 +14,4 @@ COPY --from=build /tmp /tmp
 # So https works
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /usr/bin/upgradechannel-discovery /usr/bin/upgradechannel-discovery
-ENTRYPOINT "/usr/bin/upgradechannel-discovery"
+ENTRYPOINT ["/usr/bin/upgradechannel-discovery"]
