@@ -26,6 +26,7 @@ jobs:
             quay.io/costoolkit/upgradechannel-discovery
           tags: |
             type=semver,pattern=v{{version}}
+            type=sha,format=short,prefix=${{ steps.export_tag.outputs.tag }}-
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
